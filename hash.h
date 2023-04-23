@@ -5,6 +5,9 @@
 #include <cmath>
 #include <random>
 #include <chrono>
+#include <cstring>
+#include <ctype.h>
+#include <stdio.h>
 
 typedef std::size_t HASH_INDEX_T;
 
@@ -19,16 +22,50 @@ struct MyStringHash {
     // hash function entry point (i.e. this is h(k))
     HASH_INDEX_T operator()(const std::string& k) const
     {
-        // Add your code here
+       size_t k_length = k.length();
+size_t result_hash = 0;
 
+unsigned long long converted_values[5] = {0, 0, 0, 0, 0};
+int array_idx = 4;
+int base36_exp = 0;
+
+for (int idx = k_length - 1; idx >= 0; idx--) {
+    size_t exponent = convertToBase36(base36_exp);
+
+    if (isdigit(k.at(idx))) {
+        char digit = (k.at(idx));
+        size_t value = (digit - 22);
+        converted_values[array_idx] += value * exponent;
+    } else if (isalpha(k.at(idx))) {
+        char letter = tolower(k.at(idx));
+        size_t value = (letter - 97);
+        converted_values[array_idx] += value * exponent;
+    }
+
+    base36_exp++;
+
+    if (base36_exp == 6) {
+        array_idx--;
+        base36_exp = 0;
+    }
+}
+
+for (int i = 0; i < 5; i++) {
+    result_hash += (rValues[i] * converted_values[i]);
+}
+
+return result_hash;
 
     }
 
-    // A likely helper function is to convert a-z,0-9 to an integral value 0-35
-    HASH_INDEX_T letterDigitToNumber(char letter) const
+     HASH_INDEX_T convertToBase36(int n) const
     {
-        // Add code here or delete this helper function if you do not want it
-
+      unsigned long long x = 1;
+      for(int i = 0; i < n; i++)
+      {
+        x *= 36;
+      }
+      return x;
     }
 
     // Code to generate the random R values
